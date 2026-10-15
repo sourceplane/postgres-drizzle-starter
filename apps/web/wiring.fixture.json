@@ -1,0 +1,4 @@
+{
+  "cloudflare-hyperdrive/stage": { "hyperdrive_id": "00000000000000000000000000000001", "hyperdrive_name": "stg-postgres-drizzle-starter-stage" },
+  "cloudflare-hyperdrive/prod": { "hyperdrive_id": "00000000000000000000000000000003", "hyperdrive_name": "prod-postgres-drizzle-starter-prod" }
+}
