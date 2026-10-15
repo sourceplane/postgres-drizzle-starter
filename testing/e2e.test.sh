@@ -40,7 +40,10 @@
 #      product's name, its Open Graph link on the stage origin, the static
 #      assets, a 404, and `/api/health`, which only the Worker answers); a row
 #      written behind the app's back that the next render reads; and a
-#      table emptied behind its back that the next render re-seeds;
+#      table emptied behind its back that the next render re-seeds. (wrangler
+#      dev's local binding has no query cache; a real Hyperdrive serves a
+#      plain read from its cache for up to a minute, which is why the page's
+#      read-back after a seed calls NOW() — tests/web holds that query);
 #   6. the Data API's view of the same database: every table in `public` has
 #      row-level security, and `anon` and `authenticated` — granted everything
 #      Supabase grants them — read none of the rows the page wrote and can
@@ -395,7 +398,7 @@ s, _, _ = req("/no-such-page")
 if s != 404:
     bad(f"/no-such-page answered {s}, not 404")
 
-# ── the page reads the database on every request ─────────────────────────
+# ── the page reads the database (locally on every request: no Hyperdrive cache)
 psql("insert into profiles (name, email, image) values ('Ada Lovelace', 'ada@example.invalid', "
      "'https://images.ctfassets.net/e5382hct74si/x/y/ada.jpg')")
 s, _, body = req("/"); page = body.decode().replace("<!-- -->", "")

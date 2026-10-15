@@ -14,7 +14,7 @@ Worker plus Static Assets, and its Postgres is reached through the Worker's
 | `lib/db.ts` | `getSql()`: a `postgres` client per call — the `HYPERDRIVE` binding's connection string on the Worker, `POSTGRES_URL` without a Cloudflare context |
 | `lib/drizzle.ts` | The `profiles` table (with `.enableRLS()`) and `getDb()` |
 | `lib/seed.ts` | The three demo profiles, inserted `ON CONFLICT (email) DO NOTHING` the first time the page finds the table empty |
-| `components/table.tsx` | Selects the rows, seeds an empty table, says so when the migrations have not run |
+| `components/table.tsx` | Selects the rows, seeds an empty table (reading it back with a query Hyperdrive's cache cannot answer), says so when the migrations have not run |
 | `app/api/health/route.ts` | 200 only when the database answers through the binding and the table exists with row-level security |
 | `lib/migrations`, `drizzle.config.ts` | drizzle-kit, for a local database (`pnpm db:migrate`, `pnpm db:generate`); the deployed databases are migrated by db-migrate from `packages/db` — the same SQL |
 | `wrangler.template.jsonc` → `wrangler.jsonc` | The Worker's config; the render is committed (`pnpm run wire:fixture`) |

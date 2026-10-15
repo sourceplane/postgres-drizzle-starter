@@ -83,6 +83,13 @@ Caveats that matter:
   insert `ON CONFLICT (email) DO NOTHING`, so concurrent first requests leave
   exactly three). If the table is missing, the page says the migrations have
   not run and `/api/health` answers 503 `schema: missing`.
+- **Hyperdrive caches reads** for up to a minute (60 s, plus 15 s stale while
+  it revalidates) and does not invalidate them on a write, so the page can
+  show rows up to that old. The read-back after a seed is the exception: it
+  calls `NOW()`, and Hyperdrive never caches a query that calls a non-
+  IMMUTABLE function, so a fresh environment's first visitor sees the rows
+  just written. `/api/health` is never cached for the same reason
+  (`to_regclass` is STABLE).
 - Every table in `public` has row-level security and no policy. Supabase's
   Data API serves `public` to the anon key, so this is what keeps the table
   out of it; the app is unaffected because it connects as `postgres`, the
@@ -127,7 +134,7 @@ orun integrations list --org <ws> --json && orun cloud check --org <ws>
 |---|---|
 | deploy a change | merge to `main`; watch the run; failed lanes → `gh run rerun --failed` |
 | change the schema | edit the table in `apps/web/lib/drizzle.ts` (a new table with `.enableRLS()`), `pnpm --filter @app/web db:generate`, copy the SQL into a new `packages/db/src/migrations/<nnn>_<name>/up.sql` and the manifest (`pnpm --filter @saas/db run manifest:fix` for its checksum), merge — db-migrate applies it before the app deploys. `pnpm test` fails on a table in `public` without row-level security, and on a migration whose drizzle-kit twin says something else |
-| reset the demo rows | delete them (`DELETE FROM profiles` in the Supabase SQL editor); the next page view seeds the three again |
+| reset the demo rows | delete them (`DELETE FROM profiles` in the Supabase SQL editor); once Hyperdrive's cached read expires (about a minute), the next page view seeds the three again |
 | redeploy without a change | edit the last line of the component's `component.yaml` (`# orun: redeploy <reason> <stamp>`) and merge — it is a deploy trigger, nothing reads it |
 | serve a custom domain | attach it to the Worker in Cloudflare, then set `SITE_URL` under that environment's `env:` in `intent.yaml` (the page's Open Graph link is absolute) and merge |
 | headless credentials | `ORUN_TOKEN` (workspace-scoped) + `GITHUB_TOKEN` |

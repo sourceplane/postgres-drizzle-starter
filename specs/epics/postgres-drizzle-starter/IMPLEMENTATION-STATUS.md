@@ -113,7 +113,9 @@ db-migrate → web.
   `components/table.tsx`): `seed()` lost its `CREATE TABLE`; the table seeds
   when its select returns no rows (was: when the relation was missing); a
   missing relation renders "The profiles table does not exist yet" with the
-  command to run, instead of creating it.
+  command to run, instead of creating it. The read-back after a seed adds
+  `where now() is not null`, so Hyperdrive's read cache — which would still
+  hold the empty answer for up to a minute — cannot serve it (PD-I).
 - **Row-level security on every table in `public`** (migration 020, twin
   `0001`, `.enableRLS()` in `lib/drizzle.ts`) with no policy — Supabase's Data
   API serves `public` to the anon key (PD-E). The app connects as
@@ -154,7 +156,7 @@ db-migrate → web.
 
 See the pull request for the run log. In short: the repository's checks
 (`pnpm install --frozen-lockfile`, `wire:fixture`, typecheck, lint, test —
-28 tests: 16 in `tests/web`, 12 in `tests/db` — build); every
+29 tests: 17 in `tests/web`, 12 in `tests/db` — build); every
 `testing/*.test.sh`; `orun new --status` at v2.58.11, v2.78.4 and 2.79.0;
 `orun validate`; `orun work check`; `terraform fmt -check`, `init
 -backend=false` (against the committed lock files) and `validate` on both

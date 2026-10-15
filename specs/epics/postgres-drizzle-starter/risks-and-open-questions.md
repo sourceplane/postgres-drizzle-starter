@@ -65,6 +65,23 @@ stack-tectonic's `db-migrate` composition (0.19.0) builds
 component's `path`. Lumen's package carries that name, so this one does too;
 it is a build-system name, not this product's.
 
+## PD-I — Hyperdrive's read cache and the first-request seed (RESOLVED in PD4)
+
+The Hyperdrive config caches read queries (Lumen's root: `caching.disabled =
+false`; 60 s `max_age`, 15 s stale-while-revalidate) and does not invalidate
+them on a write. Upstream's flow never met it: the first select FAILED, so
+nothing empty was cached. Seeding on an empty table does: the first select
+succeeds with no rows, gets cached, and the same select after the seed would
+be answered from that cache — "Fetched 0 users" for up to a minute on a
+fresh environment. The read-back after a seed therefore calls `NOW()`;
+Cloudflare documents that queries calling a STABLE or VOLATILE function are
+never cached. Ordinary page views stay cacheable, so the page can be up to a
+minute stale, as any Hyperdrive read is. `/api/health`'s query calls
+`to_regclass` (STABLE) and is never cached. Not observable offline:
+`wrangler dev`'s local binding has no cache. A cache-disabled second
+Hyperdrive config (Cloudflare's own suggestion for read-after-write) was
+rejected as more infrastructure than one read needs.
+
 ## PD-D — Drizzle 0.28 → current (RESOLVED)
 
 The schema's extra-config callback returns an object, which the current

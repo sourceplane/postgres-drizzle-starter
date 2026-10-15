@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import * as path from "node:path";
 
 // The connection string comes from the HYPERDRIVE binding on the Worker and
 // from POSTGRES_URL elsewhere; the Table seeds on the "relation does not
@@ -51,13 +53,22 @@ describe("Table (components/table.tsx)", () => {
   async function render(results: Array<unknown[] | Error>) {
     vi.resetModules();
     let calls = 0;
+    const filtered: number[] = [];
+    // drizzle's builder: awaitable as is, or narrowed with .where().
+    const run = async () => {
+      const r = results[Math.min(calls, results.length - 1)];
+      calls += 1;
+      if (r instanceof Error) throw r;
+      return r;
+    };
     const select = () => ({
-      from: async () => {
-        const r = results[Math.min(calls, results.length - 1)];
-        calls += 1;
-        if (r instanceof Error) throw r;
-        return r;
-      },
+      from: () => ({
+        then: (ok: (v: unknown) => unknown, ko: (e: unknown) => unknown) => run().then(ok, ko),
+        where: () => {
+          filtered.push(calls);
+          return run();
+        },
+      }),
     });
     const seed = vi.fn(async () => ({}));
     vi.doMock("@/lib/drizzle", () => ({ getDb: async () => ({ select }), UsersTable: {} }));
@@ -65,7 +76,7 @@ describe("Table (components/table.tsx)", () => {
     vi.doMock("next/image", () => ({ default: (p: { alt: string }) => <img alt={p.alt} /> }));
     vi.doMock("@/components/refresh-button", () => ({ default: () => null }));
     const { default: Table } = await import("@/components/table");
-    return { html: renderToStaticMarkup(await Table()), seed, selects: () => calls };
+    return { html: renderToStaticMarkup(await Table()), seed, selects: () => calls, filtered };
   }
 
   it("renders the users without writing when the table has rows", async () => {
@@ -82,6 +93,14 @@ describe("Table (components/table.tsx)", () => {
     expect(seed).toHaveBeenCalledTimes(1);
     expect(selects()).toBe(2);
     expect(html).toContain("Fetched 1 users in");
+  });
+
+  it("reads the seed back with a query Hyperdrive will not answer from its cache", async () => {
+    const { filtered } = await render([[], rows]);
+    // the first select is plain (cacheable); only the read-back is narrowed
+    expect(filtered).toEqual([1]);
+    const table = readFileSync(path.resolve(__dirname, "../../../apps/web/components/table.tsx"), "utf8");
+    expect(table).toMatch(/\.where\(sql`now\(\) is not null`\)/);
   });
 
   it("says the migrations have not run instead of creating the table", async () => {

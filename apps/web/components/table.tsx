@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { getDb, UsersTable } from '@/lib/drizzle'
 import { timeAgo } from '@/lib/utils'
 import Image from 'next/image'
@@ -22,7 +23,15 @@ export default async function Table() {
     console.log('Table is empty, seeding it with dummy data now...')
     await seed()
     startTime = Date.now()
-    users = await db.select().from(UsersTable)
+    // Hyperdrive caches read queries for up to a minute and does not
+    // invalidate them on a write, so the plain select above may keep
+    // answering with the empty table for a while yet. Read back what the
+    // seed wrote with a query it never caches: one that calls NOW(), a STABLE
+    // function (Hyperdrive caches only queries whose functions are IMMUTABLE).
+    users = await db
+      .select()
+      .from(UsersTable)
+      .where(sql`now() is not null`)
   }
 
   const duration = Date.now() - startTime
