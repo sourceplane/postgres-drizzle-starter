@@ -1,9 +1,10 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
+import { SITE_NAME } from '@/lib/site'
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
-  title: 'Postgres Demo with Drizzle',
+  title: SITE_NAME,
   description:
     'A simple Next.js app with a Postgres database and Drizzle as the ORM',
 }

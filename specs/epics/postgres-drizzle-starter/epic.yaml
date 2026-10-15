@@ -8,8 +8,8 @@ metadata:
   key: PD
 spec:
   title: "Vercel's Postgres + Drizzle Next.js Starter on Cloudflare Workers with Supabase Postgres"
-  summary: "The Vercel Postgres + Drizzle starter — one page that reads a `profiles` table with Drizzle, seeding it on first use — runs on Cloudflare Workers + Static Assets through @opennextjs/cloudflare with the database being a Supabase Postgres project reached through Cloudflare Hyperdrive, both provisioned by Terraform through Orun, inside the Lumen baseline's repository conventions. The schema, the query and the seed stay as written; what moves is where the connection string comes from (the Hyperdrive binding, per request) instead of a module-level POSTGRES_URL client."
-  state: completed
+  summary: "The Vercel Postgres + Drizzle starter — one page that reads a `profiles` table with Drizzle, seeding it on first use — runs on Cloudflare Workers + Static Assets through @opennextjs/cloudflare with the database being a Supabase Postgres project reached through Cloudflare Hyperdrive, both provisioned by Terraform through Orun, inside the Lumen baseline's repository conventions. The query and the seed rows stay as written; what moves is where the connection string comes from (the Hyperdrive binding, per request) instead of a module-level POSTGRES_URL client — and, from PD4, where the table comes from: db-migrate applies it, with row-level security, before the app serves, and the repository is an Orun baseline that instantiates the whole product in one landing."
+  state: started
   milestones:
     - name: "PD0 — the spec"
       exitCriteria:
@@ -31,3 +31,10 @@ spec:
         - "the README says how to run, test, preview and deploy it, locally against the Supabase CLI or any Postgres"
         - "the as-built status records every departure from the upstream template"
       tasks: [PD-4]
+    - name: "PD4 — a baseline"
+      exitCriteria:
+        - "blueprint.yaml (the console card, requires [github, cloudflare, supabase]) and repo-blueprint.yaml (the build) take a new product from nothing to live on stage and prod in ONE landing, then record it (01-product, 02-docs)"
+        - "the schema is applied by db-migrate (packages/db) before the app serves, with row-level security on every table in public; the page writes only the seed rows, safely under concurrent first requests"
+        - "the product's own push-to-main plan converges supabase → cloudflare-hyperdrive → db-migrate → web per environment, every edge enforced on main and advisory on a pull request"
+        - "Baseline CI is green: contract tests, the blueprint read by the pinned orun, the leak gate, the offline bootstrap and the product's plans, and the end-to-end tier"
+      tasks: [PD-5]

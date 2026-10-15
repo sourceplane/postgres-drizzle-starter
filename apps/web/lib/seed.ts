@@ -1,18 +1,17 @@
 import { getSql } from './db'
 
+// The template's three profiles, written by the page the first time it finds
+// the table empty. Upstream also created the table here (`CREATE TABLE IF NOT
+// EXISTS`) when the first select failed; that is the migrations' job now
+// (packages/db, applied by db-migrate before the Worker serves), because two
+// first requests racing through that DDL can both miss the table and one of
+// them fails on Postgres's own catalog (`duplicate key value violates unique
+// constraint "pg_type_typname_nsp_index"`). What is left is data, and it is
+// safe to race: each insert is `ON CONFLICT (email) DO NOTHING` against the
+// table's unique index, so any number of concurrent first requests leave
+// exactly these three rows.
 export async function seed() {
   const sql = await getSql()
-  // Create table with raw SQL
-  const createTable = await sql`
-      CREATE TABLE IF NOT EXISTS profiles (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        image VARCHAR(255),
-        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-  `
-  console.log(`Created "profiles" table`)
 
   const profiles = await Promise.all([
     sql`
@@ -34,7 +33,6 @@ export async function seed() {
   console.log(`Seeded ${profiles.length} users`)
 
   return {
-    createTable,
     insertedUsers: profiles,
   }
 }

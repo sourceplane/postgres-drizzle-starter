@@ -12,11 +12,30 @@ spec:
   # Its own lane per environment: the Next.js build is the longest job in the
   # plan, and a shared lane would wait on it.
   lane: isolated
-  # Hyperdrive (and behind it the Supabase project) must exist before this
-  # deploys: its id is rendered into the wrangler config from the
-  # cloudflare-hyperdrive root's wiring document.
+  # INFRA BEFORE APP, ENFORCED ON MAIN. A merge to main converges the whole
+  # product in one run: the Supabase project, then the Hyperdrive config over
+  # its database, then the migrations, then this Worker. Its deploy reads the
+  # Hyperdrive id (WIRING_CLOUDFLARE_HYPERDRIVE_<ENV>, rendered into the
+  # HYPERDRIVE binding) and its page queries the migrated `profiles` table, and
+  # a job resolves its secrets when it STARTS — so it waits on both,
+  # `mode: enforced`, and the ids the applies lease-published are there. A pull
+  # request deploys nothing, so nothing on one waits: every edge is advisory
+  # there.
   dependsOn:
     - component: cloudflare-hyperdrive
+      mode: enforced
+      modeRules:
+        - mode: advisory
+          when:
+            triggerRef: github-pull-request
+    - component: db-migrate
+      mode: enforced
+      modeRules:
+        - mode: advisory
+          when:
+            triggerRef: github-pull-request
+  # The wiring documents the cloudflare-hyperdrive root lease-publishes, one
+  # per deployed environment; tooling/wire/live.mjs picks this job's.
   secretEnv:
     WIRING_CLOUDFLARE_HYPERDRIVE_STAGE: "secret://postgres-drizzle-starter/postgres-drizzle-starter/stage/WIRING_CLOUDFLARE_HYPERDRIVE"
     WIRING_CLOUDFLARE_HYPERDRIVE_PROD: "secret://postgres-drizzle-starter/postgres-drizzle-starter/prod/WIRING_CLOUDFLARE_HYPERDRIVE"
@@ -60,12 +79,28 @@ spec:
     workersDevSubdomain: your-workers-subdomain
 
     installCommand: pnpm install --frozen-lockfile
-    # Render this environment's wrangler config from the wiring document, then
-    # build with the environment's Worker URL as the site origin.
-    buildCommand: node ../../tooling/wire/live.mjs --template wrangler.template.jsonc --out wrangler.jsonc --components cloudflare-hyperdrive --env "${ORUN_ENVIRONMENT}" && NEXT_PUBLIC_SITE_URL="https://postgres-drizzle-starter-web-${ORUN_ENVIRONMENT}.${WORKERS_DEV_SUBDOMAIN}.workers.dev" pnpm exec turbo run build --filter=@app/web
+    # wrangler.jsonc is COMMITTED — the fixture render, so the composition's
+    # structure check (`test -f wrangler.jsonc`, before the build, in a fresh
+    # checkout) passes. Stage and prod re-render it here, in their own job
+    # tree, from this environment's wiring document, so the Worker binds the
+    # real Hyperdrive config; dev verifies with the fixture and has no wiring.
+    #
+    # The site's public origin (the Open Graph image link is absolute): the
+    # environment's SITE_URL when intent.yaml sets one (a custom domain), else
+    # its workers.dev URL. The subdomain is written out rather than read from
+    # ${WORKERS_DEV_SUBDOMAIN}: the composition exports that to the smoke step
+    # only, so the build would see it empty and bake
+    # `https://<worker>-<env>..workers.dev` into the link. ${ORUN_ENVIRONMENT}
+    # the runner sets for every step.
+    buildCommand: if [ "${ORUN_ENVIRONMENT}" != dev ]; then node ../../tooling/wire/live.mjs --template wrangler.template.jsonc --out wrangler.jsonc --components cloudflare-hyperdrive --env "${ORUN_ENVIRONMENT}"; fi && NEXT_PUBLIC_SITE_URL="${SITE_URL:-https://postgres-drizzle-starter-web-${ORUN_ENVIRONMENT}.your-workers-subdomain.workers.dev}" pnpm exec turbo run build --filter=@app/web
 
-    # Smoke: the home page renders and carries the app's marker text.
-    smokeCommand: "html=$(curl -sfL \"${DEPLOYED_URL}/\") && echo \"${html}\" | grep -q 'Postgres on Cloudflare'"
+    # Smoke: the home page renders the table — "Recent Users" is the heading
+    # the table component renders only once its query through the HYPERDRIVE
+    # binding returned (not the site's name, which is the owner's to change
+    # and HTML-escaped when it carries an `&` or `'`) — and /api/health answers
+    # ok: the database reachable and migrated. Each response is buffered
+    # before grep so an early match cannot SIGPIPE curl.
+    smokeCommand: "html=$(curl -sfL \"${DEPLOYED_URL}/\") && echo \"${html}\" | grep -q 'Recent Users' && health=$(curl -sf \"${DEPLOYED_URL}/api/health\") && echo \"${health}\" | grep -q '\"ok\":true'"
   labels:
     team: platform
     layer: delivery

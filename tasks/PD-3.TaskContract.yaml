@@ -1,5 +1,8 @@
 apiVersion: orun.io/v1
 kind: TaskContract
+metadata:
+  name: PD-3
+  title: "Supabase and Hyperdrive from Terraform"
 spec:
   goal: The Supabase project and the Hyperdrive config per environment are provisioned by Terraform through Orun and publish the wiring document the app renders from
   affects:
