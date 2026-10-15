@@ -9,7 +9,7 @@ metadata:
 spec:
   title: "Vercel's Postgres + Drizzle Next.js Starter on Cloudflare Workers with Supabase Postgres"
   summary: "The Vercel Postgres + Drizzle starter — one page that reads a `profiles` table with Drizzle, seeding it on first use — runs on Cloudflare Workers + Static Assets through @opennextjs/cloudflare with the database being a Supabase Postgres project reached through Cloudflare Hyperdrive, both provisioned by Terraform through Orun, inside the Lumen baseline's repository conventions. The schema, the query and the seed stay as written; what moves is where the connection string comes from (the Hyperdrive binding, per request) instead of a module-level POSTGRES_URL client."
-  state: backlog
+  state: completed
   milestones:
     - name: "PD0 — the spec"
       exitCriteria:
