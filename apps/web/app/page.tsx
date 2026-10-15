@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import Table from '@/components/table'
 import TablePlaceholder from '@/components/table-placeholder'
 import ExpandingArrow from '@/components/expanding-arrow'
+import { SITE_NAME } from '@/lib/site'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,7 @@ export default function Home() {
         <ExpandingArrow />
       </Link>
       <h1 className="pt-4 pb-8 bg-gradient-to-br from-black via-[#171717] to-[#4b4b4b] bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl">
-        Postgres on Cloudflare
+        {SITE_NAME}
       </h1>
       <Suspense fallback={<TablePlaceholder />}>
         <Table />

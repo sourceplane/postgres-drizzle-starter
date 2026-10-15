@@ -9,7 +9,9 @@
     "preview": "opennextjs-cloudflare preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "wire:fixture": "node ../../tooling/wire/render.mjs --template wrangler.template.jsonc --out wrangler.jsonc --map wiring.fixture.json --env stage"
+    "wire:fixture": "node ../../tooling/wire/render.mjs --template wrangler.template.jsonc --out wrangler.jsonc --map wiring.fixture.json --env stage",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.11",

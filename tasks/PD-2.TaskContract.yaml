@@ -1,5 +1,8 @@
 apiVersion: orun.io/v1
 kind: TaskContract
+metadata:
+  name: PD-2
+  title: "The profiles table on Workers"
 spec:
   goal: The upstream Postgres + Drizzle starter runs on Cloudflare Workers with Postgres through the Hyperdrive binding, a per-environment rendered wrangler config and green checks
   affects:

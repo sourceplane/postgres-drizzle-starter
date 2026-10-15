@@ -1,0 +1,39 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: PD-5
+  title: "A baseline"
+spec:
+  goal: The repository is an Orun baseline on the Lumen conventions — a card and a build document that take a new product from nothing to live on stage and prod in one landing (Supabase, then Hyperdrive, then the migrations, then the app), branded as its own, its schema applied before the app serves and shut to Supabase's Data API, with gates that prove it offline
+  affects:
+    - blueprint.yaml
+    - repo-blueprint.yaml
+    - BOOTSTRAP.md
+    - README.md
+    - .baseline/**
+    - tooling/rebrand/**
+    - tooling/bootstrap/**
+    - hooks/**
+    - testing/**
+    - docs/phases/**
+    - ai/context/**
+    - .github/workflows/**
+    - .gitignore
+    - intent.yaml
+    - pnpm-workspace.yaml
+    - pnpm-lock.yaml
+    - apps/web/**
+    - packages/db/**
+    - infra/**
+    - tests/web/**
+    - tests/db/**
+    - specs/**
+    - tasks/**
+  doneWhen:
+    - orun (the bootstrap floor, the lane pin and 2.79.0) reads repo-blueprint.yaml, and the card agrees with it
+    - the product's own push-to-main plan orders supabase → cloudflare-hyperdrive → db-migrate → web, enforced, and a pull request's plan holds the same edges advisory
+    - the schema is db-migrate's, applied before the app serves, with row-level security on every table in public and a test that fails on a table without it
+    - a product built offline installs, migrates a local Postgres with its own runner, builds in the job tree orun stages, serves, and reads and writes the database through the page's query path under concurrent first requests
+    - the as-built status records the departures and what is not yet proven live
+  gates:
+    - checks
