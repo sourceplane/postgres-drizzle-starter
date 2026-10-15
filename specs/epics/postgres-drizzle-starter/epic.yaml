@@ -1,0 +1,33 @@
+# The epic's declaration. metadata.name equals the directory name; metadata.key
+# is the task-key prefix this epic reserves (PD → PD-1, PD-2, …). Owner, target
+# date and health are the platform's — never written here.
+apiVersion: orun.io/v1
+kind: Epic
+metadata:
+  name: postgres-drizzle-starter
+  key: PD
+spec:
+  title: "Vercel's Postgres + Drizzle Next.js Starter on Cloudflare Workers with Supabase Postgres"
+  summary: "The Vercel Postgres + Drizzle starter — one page that reads a `profiles` table with Drizzle, seeding it on first use — runs on Cloudflare Workers + Static Assets through @opennextjs/cloudflare with the database being a Supabase Postgres project reached through Cloudflare Hyperdrive, both provisioned by Terraform through Orun, inside the Lumen baseline's repository conventions. The schema, the query and the seed stay as written; what moves is where the connection string comes from (the Hyperdrive binding, per request) instead of a module-level POSTGRES_URL client."
+  state: backlog
+  milestones:
+    - name: "PD0 — the spec"
+      exitCriteria:
+        - "the doc set and the task contracts are on main"
+      tasks: [PD-1]
+    - name: "PD1 — the profiles table on Workers"
+      exitCriteria:
+        - "apps/web is the upstream template with lib/db.ts opening a Postgres client per call from the HYPERDRIVE binding"
+        - "the wrangler config renders per environment from the cloudflare-hyperdrive root's wiring document (fixture in verify, live in deploy)"
+        - "`pnpm typecheck`, `pnpm lint`, `pnpm test` and `pnpm build` are green on main (Checks)"
+        - "`wrangler dev` boots the Worker, serves the static shell and reaches for the local Postgres through the binding"
+      tasks: [PD-2]
+    - name: "PD2 — Supabase and Hyperdrive from Terraform"
+      exitCriteria:
+        - "infra/terraform/supabase and infra/terraform/cloudflare-hyperdrive provision the stage and prod project and config and publish the wiring document the app renders from"
+      tasks: [PD-3]
+    - name: "PD3 — ready to instantiate"
+      exitCriteria:
+        - "the README says how to run, test, preview and deploy it, locally against the Supabase CLI or any Postgres"
+        - "the as-built status records every departure from the upstream template"
+      tasks: [PD-4]
