@@ -75,7 +75,7 @@ product itself changing.
   register names the missing live bootstrap (PD-J).
 
 **Done when**
-- `git grep -i kiox` finds nothing, and the leak gate and the offline
+- `git grep -i kiox` finds only this milestone's own record, and the leak gate and the offline
   bootstrap pass without the two modules
 - the docs check is green in Baseline CI
 - this file, the status file and `epic.yaml` agree
