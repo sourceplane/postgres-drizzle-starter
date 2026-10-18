@@ -86,3 +86,22 @@ rejected as more infrastructure than one read needs.
 
 The schema's extra-config callback returns an object, which the current
 line still accepts (deprecated in favour of an array). Kept as written.
+
+## PD-J — No live bootstrap yet (OPEN)
+
+Everything short of the platform is proven on every pull request: the card
+against the build, the blueprint read by the bootstrap floor, the leak gate,
+the offline bootstrap with the blueprint's own hooks, the product's own plan
+(supabase → cloudflare-hyperdrive → db-migrate → web per environment,
+enforced on main, advisory on a pull request), and the produced product
+migrated by its own runner into a local Postgres with Supabase's roles,
+built in the job tree, dry-deployed, served over that database with eight
+racing first requests, smoke-tested, and read by the Data API's roles, which
+see nothing. NOT proven: the repository created and linked, the five keys
+minted by `integrations/reconcile`, a real `terraform apply` of the Supabase
+projects and the Hyperdrive configs (both roots are held to `terraform
+validate`), the published secrets, a `db-migrate` apply against a real
+Supabase project, a real `wrangler deploy`, Hyperdrive's read cache (PD-I),
+and the probes of `/` and `/api/health`. Closes with one bootstrap from a
+tag against a workspace with Cloudflare and Supabase connections and room
+for two Supabase projects (PD-F).

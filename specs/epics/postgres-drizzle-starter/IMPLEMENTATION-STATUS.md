@@ -9,7 +9,8 @@ the code departed from `design.md` or from the upstream template.
 | PD1 — the profiles table on Workers | ✅ Shipped | [#2](https://github.com/sourceplane/postgres-drizzle-starter/pull/2) |
 | PD2 — Supabase and Hyperdrive from Terraform | ✅ Shipped (validated; apply gated on a linked workspace) | [#3](https://github.com/sourceplane/postgres-drizzle-starter/pull/3) |
 | PD3 — ready to instantiate | ✅ Shipped | [#4](https://github.com/sourceplane/postgres-drizzle-starter/pull/4) |
-| PD4 — a baseline | 🔄 In review (PD-5) | this branch, `claude/blissful-ptolemy-c5ajf8` |
+| PD4 — a baseline | ✅ Shipped (offline-proven; no live bootstrap yet, risk PD-J) | [#5](https://github.com/sourceplane/postgres-drizzle-starter/pull/5) (PD-5), tagged `baseline-v1` |
+| PD5 — the cirrus standard | ✅ Shipped | PD-6 — on `main` after `baseline-v1`, not yet tagged |
 
 ## Departures from the upstream template
 
@@ -27,6 +28,12 @@ the monorepo tracing root, `initOpenNextCloudflareForDev()`.
 
 ### `metadataBase` from `NEXT_PUBLIC_SITE_URL`
 
+Upstream's layout hard-codes `metadataBase: new URL('https://postgres-drizzle.vercel.app')`.
+`app/layout.tsx` reads `NEXT_PUBLIC_SITE_URL` instead (falling back to
+`http://localhost:3000`), and the deploy's build sets it to the
+environment's `SITE_URL` or, unset, its workers.dev URL
+(`apps/web/component.yaml`'s `buildCommand`; risk PD-G).
+
 ### Page copy and links
 
 "Postgres on Vercel" → "Postgres on Cloudflare"; the deploy button → this
@@ -39,7 +46,10 @@ drizzle-orm 0.28 → ^0.45 (schema unchanged), drizzle-kit ^0.31, Next
 `react-hooks/purity` off for the template's `catch (e: any)` and its
 `Date.now()` timing during render).
 
-## Verified
+## Verified (PD1–PD3)
+
+(What was checked when PD1–PD3 landed: `tests/web` then held 4 tests. PD4's
+count is under Verified (PD4), PD5's under Verified (PD5).)
 
 - Local: `pnpm run wire:fixture`, `pnpm typecheck`, `pnpm lint`, `pnpm test`
   (4 tests), `pnpm build` green (`/` dynamic); `wrangler dev` boots, serves
@@ -163,3 +173,45 @@ See the pull request for the run log. In short: the repository's checks
 roots. Not verified: a Terraform apply, a db-migrate apply against a real
 Supabase project, a live deploy, and a live bootstrap — all need a linked
 workspace with Cloudflare and Supabase connections.
+
+## The cirrus standard (PD5)
+
+Nothing about the product changed. What changed is the baseline around it:
+
+| What | Before | After | Why |
+|---|---|---|---|
+| orun pin | `kiox.yaml` (v2.15.0) + `kiox.lock`, shipped to every product | gone; orun is pinned where it runs, the `orun-action` `version:` in each workflow | nothing ran the kiox pin, and it disagreed with the lanes (v2.78.4) |
+| `root-kiox`, `root-kiox-lock` modules | in `01-product` | removed (`testing/phases.test.sh` and the rebrand's skip list follow) | a product is placed with 126 files: 107 − 2 kiox + 21 docs pages |
+| component docs | none | `docs/overview.md`, `architecture.md`, `runbook.md` beside each of the seven `component.yaml` (`apps/web`, `packages/db`, `infra/db-migrate`, `infra/terraform/{supabase,cloudflare-hyperdrive}`, `tests/{web,db}`) | cirrus-baseline documents every component; the workspace Docs library renders `docs/` beside each `component.yaml` |
+| how the docs stay true | — | `tooling/catalog/gen-component-docs.py` derives them from the manifest, the Worker config, Terraform, the migrations and package scripts; Baseline CI runs it with `--check` | a hand-written copy of a manifest drifts silently |
+| context pack | `operations.md`, `deployment.md` | plus `current.md`, `decisions.md`, `open-risks.md` | cirrus-baseline's shape; the three new pages are this repository's own and no module places them (the leak gate still allows exactly two) |
+| status | PD4 "in review" on its branch; an empty `metadataBase` heading; an unlabeled Verified section's "4 tests"; no risk for the missing live bootstrap | PD4 shipped and tagged `baseline-v1`; the heading says what changed; the section is labeled PD1–PD3; risk PD-J (OPEN) | the tag existed; the documents had not caught up |
+
+## Verified (PD5)
+
+- `testing/{manifest,phases,coverage,rebrand,retouch,bootstrap-defer}.test.sh`
+  green; `gen-component-docs.py --check` green (7 components, 21 pages).
+- `orun new --status` (v2.58.11, the bootstrap floor): `01-product` 126
+  files, `02-docs` hook-only.
+- `testing/leak.test.sh` (v2.58.11): 126 files derived (107 − 2 kiox + 21
+  docs pages), 123 text files read; ai/context still exactly the two
+  declared pages; no factory path ships or is named by a shipped file.
+- `testing/placement.test.sh` (v2.58.11, as Baseline CI runs it): 126 files
+  placed, both landings, branded, re-tenanted, record rendered; the
+  product's own plan for the 01-product merge converges supabase →
+  cloudflare-hyperdrive → db-migrate → web, enforced, on stage and prod side
+  by side, resolving exactly the 5 keys the blueprint mints; `--resume`
+  changes nothing.
+- `pnpm install --frozen-lockfile`, `wire:fixture` (committed render
+  unchanged), `typecheck`, `lint`, `test` (29 tests: 17 in `tests/web`, 12
+  in `tests/db`), `build` green.
+- `testing/e2e.test.sh` (v2.78.4): the 01-product landing passes the Checks
+  sequence; the stage db-migrate lane builds `@saas/db` and applies the 3
+  migrations to a local Postgres with Supabase's roles, a second apply
+  applies nothing, and the pull request's plan verifies every checksum
+  offline; the stage web lane's five steps pass in the staged job tree;
+  under `wrangler dev` eight concurrent first requests all render the table
+  and leave exactly the 3 seed rows, the component's own smoke passes, and
+  `anon` and `authenticated` read none of the rows and write none.
+- `orun task check PD-6` complete.
+

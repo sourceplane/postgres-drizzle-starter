@@ -24,7 +24,7 @@
 - the README quick start works from a fresh clone
 - the status file lists every PR and departure
 
-## PD4 — a baseline
+## PD4 — a baseline (PD-5) ✅
 
 The repository becomes an Orun baseline on the Lumen conventions, built the
 way cirrus-baseline v22 builds a product — in ONE landing:
@@ -55,6 +55,30 @@ way cirrus-baseline v22 builds a product — in ONE landing:
   in the job tree orun stages, and serves the page over it — eight concurrent
   first requests leaving exactly the three seed rows — while the Data API's
   roles read and write none of it
+
+## PD5 — the cirrus standard (PD-6) ✅
+
+Bring the baseline to cirrus-baseline's standard, with nothing about the
+product itself changing.
+
+- **No kiox.** `kiox.yaml`/`kiox.lock` pinned an orun (v2.15.0) that nothing
+  ran: every workflow installs orun itself through `orun-action` with its own
+  `version:`. The files, their two modules and the rebrand's skip entry go.
+- **Component docs.** `tooling/catalog/gen-component-docs.py` writes each
+  component's `docs/overview.md`, `docs/architecture.md` and `docs/runbook.md`
+  from what the component declares, as cirrus-baseline's do; the pages ship
+  with the component. Baseline CI runs it with `--check`.
+- **The context pack.** `ai/context/current.md`, `decisions.md` and
+  `open-risks.md` beside the two pages a product ships with — this
+  repository's own, so no module places them.
+- **Status that agrees with the tags.** PD4 is shipped and tagged; the risk
+  register names the missing live bootstrap (PD-J).
+
+**Done when**
+- `git grep -i kiox` finds nothing, and the leak gate and the offline
+  bootstrap pass without the two modules
+- the docs check is green in Baseline CI
+- this file, the status file and `epic.yaml` agree
 
 ## Sequencing note
 
