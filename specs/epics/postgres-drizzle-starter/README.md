@@ -8,7 +8,7 @@ The port keeps the page, the table component, the refresh button, the schema and
 
 | Field | Value |
 |-------|-------|
-| Status | ✅ PD0–PD4 shipped (#1–#5), tagged `baseline-v1`; PD5 (the cirrus standard, PD-6) on `main`, not yet tagged. Terraform applies, a live db-migrate apply and a live deploy are proven only by a live bootstrap (risk PD-J) |
+| Status | ✅ PD0–PD5 shipped (#1–#7; PD4 tagged `baseline-v1`, PD5 — the cirrus standard, PD-6 and PD-7 — tagged `baseline-v2`). Terraform applies, a live db-migrate apply and a live deploy are proven only by a live bootstrap (risk PD-J) |
 | Cluster | **PD** (PD0–PD5) |
 | Owner(s) | `apps/web` (the page, `lib/db.ts`, `lib/drizzle.ts`, `lib/seed.ts`) · `packages/db` (the migrations and their runner) · `tests/web`, `tests/db` · `infra/terraform/{supabase,cloudflare-hyperdrive}`, `infra/db-migrate` |
 | Builds on | `lumen`: the `supabase` and `cloudflare-hyperdrive` roots and the per-request `postgres` client; the `saas-starter` port's `getDb()` pattern |
@@ -16,7 +16,7 @@ The port keeps the page, the table component, the refresh button, the schema and
 | Changes | The client resolution (module-level `POSTGRES_URL` → per-request Hyperdrive), the Workers build, tests, two Terraform roots, the deploy contract; page copy says Cloudflare |
 | Decisions locked | (1) Per-request client, Hyperdrive first, `POSTGRES_URL` fallback. (2) ~~Seed-on-first-use kept as upstream; no `db-migrate` for one table~~ → PD4: the table is `db-migrate`'s, applied before the app serves, with row-level security; the page seeds only the rows, on an empty table. (3) `wrangler.jsonc` rendered from the template: committed as the fixture render (the composition checks it exists before the build), re-rendered per environment by the deploy lanes (PD4; it was git-ignored before). (4) Drizzle moves from 0.28 to the current line with the schema as written. (5) Infra before app on main: supabase → cloudflare-hyperdrive → db-migrate → web, enforced; advisory on pull requests (PD4). |
 | Gate | PD1 is the first user-visible rung. PD2 applies only with a linked workspace (Supabase + Cloudflare connections); verified by `terraform validate`. |
-| Shipped as | `baseline-v1` ([#5](https://github.com/sourceplane/postgres-drizzle-starter/pull/5)), then PD5 on `main`; proven offline (Baseline CI: migrated into a local Postgres and served through the built Worker under `wrangler dev`), deploy gated until a workspace is linked |
+| Shipped as | `baseline-v1` ([#5](https://github.com/sourceplane/postgres-drizzle-starter/pull/5)), `baseline-v2` ([#6](https://github.com/sourceplane/postgres-drizzle-starter/pull/6), [#7](https://github.com/sourceplane/postgres-drizzle-starter/pull/7)); proven offline (Baseline CI: migrated into a local Postgres and served through the built Worker under `wrangler dev`), deploy gated until a workspace is linked |
 
 ## Read order
 
@@ -34,4 +34,4 @@ The port keeps the page, the table component, the refresh button, the schema and
 | PD2 — Supabase and Hyperdrive from Terraform | the two roots | they validate; the wiring key matches the template |
 | PD3 — ready to instantiate | README, as-built status | a reader can run, test, preview and deploy it |
 | PD4 — a baseline | card, build document, rename, bootstrap tooling, the migrations and `db-migrate`, row-level security, the product's README and context pack, tests | a new product goes from nothing to live on stage and prod in one landing; Baseline CI green |
-| PD5 — the cirrus standard | no kiox, generated component docs, the context pack, status that agrees with the tags | Baseline CI green with the docs check |
+| PD5 — the cirrus standard | no kiox, generated component docs, the context pack, status that agrees with the tags; the console card reads `subdomain` from the Cloudflare connection | Baseline CI green with the docs check |

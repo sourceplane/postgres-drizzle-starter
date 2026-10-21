@@ -56,7 +56,7 @@ way cirrus-baseline v22 builds a product — in ONE landing:
   first requests leaving exactly the three seed rows — while the Data API's
   roles read and write none of it
 
-## PD5 — the cirrus standard (PD-6) ✅
+## PD5 — the cirrus standard (PD-6, PD-7) ✅
 
 Bring the baseline to cirrus-baseline's standard, with nothing about the
 product itself changing.
@@ -73,6 +73,12 @@ product itself changing.
   repository's own, so no module places them.
 - **Status that agrees with the tags.** PD4 is shipped and tagged; the risk
   register names the missing live bootstrap (PD-J).
+- **The subdomain from the Cloudflare connection (PD-7).** The card's
+  `subdomain` input declares `from: connection.cloudflare.workersSubdomain`,
+  as cirrus-baseline since `baseline-v23`: the console fills it from the
+  connection the build is bound to and renders no field; `manifest.test.sh`
+  accepts the source only while the card requires `cloudflare`. A hand-run
+  build still passes `--set subdomain`.
 
 **Done when**
 - `git grep -i kiox` finds only this milestone's own record, and the leak gate and the offline
