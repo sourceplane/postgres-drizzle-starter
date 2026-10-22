@@ -11,6 +11,7 @@ the code departed from `design.md` or from the upstream template.
 | PD3 — ready to instantiate | ✅ Shipped | [#4](https://github.com/sourceplane/postgres-drizzle-starter/pull/4) |
 | PD4 — a baseline | ✅ Shipped (offline-proven; no live bootstrap yet, risk PD-J) | [#5](https://github.com/sourceplane/postgres-drizzle-starter/pull/5) (PD-5), tagged `baseline-v1` |
 | PD5 — the cirrus standard | ✅ Shipped | [#6](https://github.com/sourceplane/postgres-drizzle-starter/pull/6) (PD-6), [#7](https://github.com/sourceplane/postgres-drizzle-starter/pull/7) (PD-7), tagged `baseline-v2` |
+| PD6 — the domain is set later | ✅ Shipped | [#8](https://github.com/sourceplane/postgres-drizzle-starter/pull/8) (PD-8), tagged `baseline-v3` |
 
 ## Departures from the upstream template
 
@@ -251,3 +252,46 @@ passes.
   `anon` and `authenticated` read none of the rows and write none.
 - `orun task check PD-6` complete.
 
+## The domain is set later (PD6, PD-8)
+
+The console asked for the product's domain, with help text that said it did
+not need to exist — and nothing in the build needed one: the app answers on
+workers.dev from its first deploy, its origin (the page's absolute Open Graph
+link) is `SITE_URL` when an environment sets it and the environment's
+workers.dev URL when it does not, and the one place the repository names the
+domain is `BASE_DOMAIN` under each environment's `env:` in `intent.yaml`,
+which nothing builds a URL from. The Supabase project here is a database
+only: no Auth URL is built from anything. A domain is an owner's step after
+the bootstrap (README, "Custom domain"), so the form no longer asks for it.
+
+- `blueprint.yaml` declares no `productdomain` input; the console's Product
+  step asks for the product's name alone.
+- `repo-blueprint.yaml`'s `productdomain` is optional, default empty. No hook,
+  probe or `when:` reads it — the only use is the `.rebrand/values.json`
+  template, which writes `""`. A hand-run build may still pass
+  `--set productdomain=` for a product that already has its domain.
+- `rebrand.mjs` no longer requires it. Empty, it brands the reserved
+  placeholder `<reponame>.example.com` (RFC 2606 — never someone else's
+  domain) where the domain goes — `BASE_DOMAIN` in dev, stage and prod — so
+  setting it later is replacing one string; the product README and
+  `ai/context/operations.md` say so, beside the `SITE_URL` that actually
+  moves the page's links onto the domain.
+- `testing/fixtures/acme.json` carries no domain, so the leak gate, the
+  offline bootstrap and the e2e tier exercise exactly what a console build
+  supplies; `testing/rebrand.test.sh` pins the placeholder for an absent and
+  an empty domain; `baseline.yml`'s blueprint read sets no domain.
+
+Nothing that needs a domain was removed — it waits for one.
+
+Verified: `testing/{manifest,phases,coverage,rebrand,retouch,bootstrap-defer}.test.sh`
+green (rebrand: 32 checks, the two new ones included); `gen-component-docs.py
+--check` green (7 components); `orun new --status` on `repo-blueprint.yaml`
+with no domain (01-product pending, 126 files), `testing/leak.test.sh` (126
+files derived, 123 text files read) and `testing/placement.test.sh` (126
+tracked files; supabase → cloudflare-hyperdrive → db-migrate → web enforced
+on stage and prod; `--resume` changes nothing) at v2.58.11. The offline
+bootstrap of the fixture, which names no domain, writes
+`"productdomain": ""` and brands `acme-postgres.example.com` into the
+product's three `BASE_DOMAIN` lines, its README and its `operations.md` (5
+lines, 3 files), with no `postgres-drizzle-starter.example.com` left.
+`orun task check PD-8` complete.

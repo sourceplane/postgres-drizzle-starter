@@ -111,6 +111,13 @@ own domain, attach the domain to the Worker in Cloudflare (Workers & Pages →
 `SITE_URL` under that environment's `env:` in `intent.yaml` — the page's Open
 Graph image link is absolute — and merge.
 
+The repository also names the domain in one place, `BASE_DOMAIN` under each
+environment's `env:` in `intent.yaml`, which the product was born with as the
+reserved placeholder `postgres-drizzle-starter.example.com`. Nothing builds a
+URL from it — the origin is `SITE_URL` — so replacing it moves nothing by
+itself; it records the domain. Replace it with yours in the same pull request
+as `SITE_URL`.
+
 ## CI
 
 | Workflow | What it runs |

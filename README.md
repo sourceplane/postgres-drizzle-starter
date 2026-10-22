@@ -33,7 +33,7 @@ departure.
 git clone --depth 1 --branch <baseline-tag> https://github.com/sourceplane/postgres-drizzle-starter
 cd postgres-drizzle-starter
 orun new --blueprint repo-blueprint.yaml --out ~/products/acme-postgres --run-hooks --resume \
-  --set reponame=acme-postgres --set productname="Acme Cloud" --set productdomain=acme.dev \
+  --set reponame=acme-postgres --set productname="Acme Cloud" \
   --set githuborg=acme-inc --set subdomain=<workers-dev-subdomain>
 ```
 

@@ -19,7 +19,7 @@ per environment), then records what went live (`02-docs`).
 
 | | |
 |---|---|
-| Latest tag | `baseline-v2` (PD5 — the cirrus standard: no kiox, generated component docs, this context pack, and the console card reading `subdomain` from the Cloudflare connection); `baseline-v1` is PD4 |
+| Latest tag | `baseline-v3` (PD6 — the domain is set later: the console asks for no domain, and a product is born with the placeholder `<reponame>.example.com` in `BASE_DOMAIN` for an owner to replace); `baseline-v2` is PD5 (the cirrus standard), `baseline-v1` PD4 |
 | Proven live | No. Everything short of the platform is proven offline in Baseline CI, a migrated local Postgres served through the built Worker included; a live bootstrap from a tag is still to come (risk PD-J) |
 
 ## Where to read
@@ -34,6 +34,6 @@ per environment), then records what went live (`02-docs`).
 
 ## Next
 
-1. Bootstrap one product from `baseline-v2` against a workspace with
+1. Bootstrap one product from `baseline-v3` against a workspace with
    Cloudflare and Supabase connections and room for two Supabase projects
    (PD-F), and record its timings (closes PD-J).
