@@ -136,7 +136,7 @@ orun integrations list --org <ws> --json && orun cloud check --org <ws>
 | change the schema | edit the table in `apps/web/lib/drizzle.ts` (a new table with `.enableRLS()`), `pnpm --filter @app/web db:generate`, copy the SQL into a new `packages/db/src/migrations/<nnn>_<name>/up.sql` and the manifest (`pnpm --filter @saas/db run manifest:fix` for its checksum), merge — db-migrate applies it before the app deploys. `pnpm test` fails on a table in `public` without row-level security, and on a migration whose drizzle-kit twin says something else |
 | reset the demo rows | delete them (`DELETE FROM profiles` in the Supabase SQL editor); once Hyperdrive's cached read expires (about a minute), the next page view seeds the three again |
 | redeploy without a change | edit the last line of the component's `component.yaml` (`# orun: redeploy <reason> <stamp>`) and merge — it is a deploy trigger, nothing reads it |
-| serve a custom domain | attach it to the Worker in Cloudflare, then set `SITE_URL` under that environment's `env:` in `intent.yaml` (the page's Open Graph link is absolute) and merge |
+| serve a custom domain | attach it to the Worker in Cloudflare (README, "Custom domain"), then set `SITE_URL` under that environment's `env:` in `intent.yaml` (the page's Open Graph link is absolute), replace the placeholder `postgres-drizzle-starter.example.com` in `intent.yaml`'s `BASE_DOMAIN` with it (a record; nothing builds a URL from it), and merge |
 | headless credentials | `ORUN_TOKEN` (workspace-scoped) + `GITHUB_TOKEN` |
 
 The deployment record is the bootstrap's `02-docs` phase. Re-running it (the

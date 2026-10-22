@@ -7,6 +7,6 @@ folder is the adoption; the merge creates the epic in the workspace.
 
 | Epic | Cluster | Status | What it is |
 |------|---------|--------|------------|
-| [`postgres-drizzle-starter/`](./postgres-drizzle-starter/) | **PD** | ✅ Shipped (`baseline-v2`); live bootstrap pending | Vercel's Postgres + Drizzle Next.js Starter, equivalent in code and function, on Cloudflare Workers with Supabase Postgres through Hyperdrive — and an Orun baseline that instantiates it in one landing (PD4) |
+| [`postgres-drizzle-starter/`](./postgres-drizzle-starter/) | **PD** | ✅ Shipped (`baseline-v3`); live bootstrap pending | Vercel's Postgres + Drizzle Next.js Starter, equivalent in code and function, on Cloudflare Workers with Supabase Postgres through Hyperdrive — and an Orun baseline that instantiates it in one landing (PD4) |
 
 As-built ≠ intent: what shipped lives in each epic's `IMPLEMENTATION-STATUS.md`.

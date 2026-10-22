@@ -86,6 +86,16 @@ product itself changing.
 - the docs check is green in Baseline CI
 - this file, the status file and `epic.yaml` agree
 
+## PD6 — the domain is set later (PD-8) ✅
+
+**Done when** the console card asks for no domain; `productdomain` is an
+optional build input, empty by default; a product built without one is
+branded with the reserved placeholder `<reponame>.example.com` where the
+domain goes (`BASE_DOMAIN` in `intent.yaml`) and its README says how an
+owner sets the real one, beside the `SITE_URL` that moves the page's links;
+Baseline CI places, leak-checks and plans a product built with no domain.
+Shipped in `baseline-v3`.
+
 ## Sequencing note
 
 PD1's component already names the Hyperdrive root's wiring secret; PD2

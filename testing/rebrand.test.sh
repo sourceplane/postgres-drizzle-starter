@@ -77,6 +77,14 @@ check "the Worker's own origin (the site URL the build bakes in): worker name an
 check "the placeholder domain is the product's domain, not a renamed slug" \
   "$acme" intent.yaml '      BASE_DOMAIN: postgres-drizzle-starter.example.com' \
   '      BASE_DOMAIN: acme.dev'
+check "no domain given: the reserved placeholder, for an owner to replace later" \
+  '{"reponame":"acme-postgres","productname":"Acme Cloud","githuborg":"acme-inc","subdomain":"acme"}' \
+  intent.yaml '      BASE_DOMAIN: postgres-drizzle-starter.example.com' \
+  '      BASE_DOMAIN: acme-postgres.example.com'
+check "an empty domain is no domain" \
+  '{"reponame":"acme-postgres","productname":"Acme Cloud","productdomain":""}' \
+  intent.yaml '      BASE_DOMAIN: postgres-drizzle-starter.example.com' \
+  '      BASE_DOMAIN: acme-postgres.example.com'
 check "the repo slug" \
   "$acme" package.json '  "name": "postgres-drizzle-starter",' \
   '  "name": "acme-postgres",'
