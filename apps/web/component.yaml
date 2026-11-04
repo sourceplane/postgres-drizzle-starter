@@ -72,9 +72,9 @@ spec:
   # port, and installs first, so a checkout the session has not installed yet
   # still comes up.
   # It installs only this app's packages and caps the heap: the box is shared
-  # with the agent. No database runs in the box: the page renders, and its
-  # Recent Users table, which reads the Postgres the HYPERDRIVE binding points
-  # at, shows the error it gets.
+  # with the agent. No database runs in the box, and the page reads the
+  # Postgres the HYPERDRIVE binding points at on every request, so until one
+  # is reachable it shows Next's runtime-error screen.
   preview:
     run:
       - sh
