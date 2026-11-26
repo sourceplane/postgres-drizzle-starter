@@ -393,7 +393,7 @@ if s != 200 or json.loads(body) != {"ok": True, "database": "reachable", "schema
     bad(f"/api/health answered {s} {body[:120]!r} ({h.get('cache-control')})")
 
 # ── the static assets and the not-found page ─────────────────────────────
-for path, kind in (("/vercel.svg", "image/svg+xml"), ("/github.svg", "image/svg+xml"),
+for path, kind in (("/orunbase.svg", "image/svg+xml"), ("/github.svg", "image/svg+xml"),
                    ("/favicon.ico", "image/"), ("/opengraph-image.png", "image/png")):
     s, h, body = req(path)
     if s != 200 or not h.get("content-type", "").startswith(kind) or not body:
